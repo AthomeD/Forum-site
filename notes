@@ -1,0 +1,319 @@
+Ready                           Not Ready
+
+
+Login                            Ready
+Register                         ready
+
+profile                          ready
+
+admin                           not ready 
+
+
+
+
+code
+ss Home admin footer create post inbox  profile contact us About us 
+
+
+// Connect to the Socket.IO server
+const socket = io('http://localhost:3000');
+
+// Listen for new messages
+socket.on('receiveMessage', (data) => {
+  const { contactId, message, type, created_at } = data;
+
+  // Check if the message belongs to the active chat
+  if (contactId === activeChat) {
+    const chatBody = document.getElementById('chat-body');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.innerHTML = `<p>${message}</p><span>${new Date(created_at).toLocaleString()}</span>`;
+    chatBody.appendChild(messageDiv);
+    chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom
+  }
+});
+
+// Send a message
+document.getElementById('send-button').addEventListener('click', () => {
+  const contactId = document.getElementById('send-button').getAttribute('data-contact');
+  const messageInput = document.getElementById('message-input');
+  const message = messageInput.value.trim();
+
+  if (message) {
+    const userId = 1; // Replace with the logged-in user ID
+    socket.emit('sendMessage', { userId, contactId, message });
+    messageInput.value = ''; // Clear input
+  }
+});
+
+
+// real time message for multiple users
+const users = {};
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  // Register user
+  socket.on('register', (userId) => {
+    users[userId] = socket.id;
+    console.log('User registered:', userId, socket.id);
+  });
+
+  // Listen for a new message
+  socket.on('sendMessage', (data) => {
+    const { userId, contactId, message } = data;
+
+    // Save message to the database
+    const sql = "INSERT INTO messages (user_id, contact_id, message, type) VALUES (?, ?, ?, 'sent')";
+    db.query(sql, [userId, contactId, message], (err, result) => {
+      if (err) {
+        console.error('Error saving message:', err);
+        socket.emit('error', 'Failed to send message');
+      } else {
+        // Emit the new message to the recipient if online
+        const newMessage = { userId, contactId, message, type: 'sent', created_at: new Date() };
+        const recipientSocketId = users[contactId];
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit('receiveMessage', newMessage);
+        }
+        console.log('Message sent:', newMessage);
+      }
+    });
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+
+    // Remove user from the map
+    const userId = Object.keys(users).find((id) => users[id] === socket.id);
+    if (userId) {
+      delete users[userId];
+      console.log('User unregistered:', userId);
+    }
+  });
+});
+
+// Register the user with their ID after connecting
+const userId = 1; // Replace with the logged-in user ID
+socket.emit('register', userId);
+
+// sample 
+
+const contacts = {
+    hemal: {
+      name: "Hemal",
+      messages: [
+        { type: "received", text: "Hello", time: "8:39 am" },
+        { type: "sent", text: "Hey Hemal good morning", time: "8:40 am" },
+        { type: "received", text: "Good morning New User", time: "8:49 am" },
+        { type: "received", text: "what up", time: "9:22 am" },
+      ],
+    },
+    wow: {
+      name: "Wow Mate",
+      messages: [
+        { type: "received", text: "What is up", time: "10:15 am" },
+        { type: "sent", text: "Not much, you?", time: "10:17 am" },
+      ],
+    },
+  };
+  
+  // Selectors
+  const contactItems = document.querySelectorAll(".contact-item");
+  const chatName = document.getElementById("chat-name");
+  const chatBody = document.getElementById("chat-body");
+  const messageInput = document.getElementById("message-input");
+  const sendButton = document.getElementById("send-button");
+  
+  let activeChat = null;
+
+//   Real-Time Updates (Add polling for new messages every 5 seconds:)
+
+  function pollMessages(contactId) {
+    setInterval(() => {
+      fetch(`get_messages.php?contact_id=${contactId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            renderMessages(data.messages); // Re-render messages
+          }
+        });
+    }, 5000);
+  }
+  
+//   pollmessage() after selecting a chat
+contactItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      const chatId = item.getAttribute("data-chat");
+      activeChat = chatId;
+  
+      loadChat(chatId, item.querySelector('h4').innerText);
+      pollMessages(chatId); // Start polling for updates
+    });
+  });
+  
+  
+  // Helper: Render chat messages
+  function renderMessages(chatId) {
+    const chat = contacts[chatId];
+    chatBody.innerHTML = ""; // Clear chat body
+    chat.messages.forEach((msg) => {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${msg.type}`;
+      messageDiv.innerHTML = `<p>${msg.text}</p><span>${msg.time}</span>`;
+      chatBody.appendChild(messageDiv);
+    });
+  }
+  
+  // Handle contact selection
+  contactItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      const chatId = item.getAttribute("data-chat");
+      activeChat = chatId;
+  
+      // Highlight selected contact
+      document.querySelector(".contact-item.selected")?.classList.remove("selected");
+      item.classList.add("selected");
+  
+      // Update chat header and messages
+      chatName.textContent = contacts[chatId].name;
+      renderMessages(chatId);
+  
+      // Enable input
+      messageInput.disabled = false;
+      sendButton.disabled = false;
+    });
+  });
+  
+  // Handle message sending
+  sendButton.addEventListener("click", () => {
+    const messageText = messageInput.value.trim();
+    if (messageText && activeChat) {
+      const now = new Date();
+      const time = `${now.getHours()}:${now.getMinutes()} ${
+        now.getHours() >= 12 ? "pm" : "am"
+      }`;
+  
+      // Add message to active chat
+      contacts[activeChat].messages.push({
+        type: "sent",
+        text: messageText,
+        time: time,
+      });
+  
+      // Clear input and rerender messages
+      messageInput.value = "";
+      renderMessages(activeChat);
+    }
+  });
+  
+
+//   Fetch Contacts
+  function fetchContacts() {
+    fetch('get_contacts.php')
+      .then((response) => response.json())
+      .then((contacts) => {
+        const contactList = document.querySelector('.contact-list');
+        contactList.innerHTML = ''; // Clear previous contacts
+        contacts.forEach((contact) => {
+          const contactDiv = document.createElement('div');
+          contactDiv.className = 'contact-item';
+          contactDiv.setAttribute('data-chat', contact.id);
+          contactDiv.innerHTML = `
+            <div class="contact-avatar"></div>
+            <div class="contact-text">
+              <h4>${contact.contact_name}</h4>
+              <p>${contact.last_message || 'No messages yet'}</p>
+            </div>
+            <span class="contact-date">${new Date(contact.last_message_date).toLocaleString()}</span>
+          `;
+          contactDiv.addEventListener('click', () => loadChat(contact.id, contact.contact_name));
+          contactList.appendChild(contactDiv);
+        });
+      });
+  }
+  fetchContacts();
+  
+//  Fetch Messages
+
+  function loadChat(contactId, contactName) {
+    fetch(`get_messages.php?contact_id=${contactId}`)
+      .then((response) => response.json())
+      .then((messages) => {
+        const chatBody = document.getElementById('chat-body');
+        chatBody.innerHTML = ''; // Clear previous messages
+  
+        messages.forEach((msg) => {
+          const messageDiv = document.createElement('div');
+          messageDiv.className = `message ${msg.type}`;
+          messageDiv.innerHTML = `<p>${msg.message}</p><span>${new Date(msg.created_at).toLocaleString()}</span>`;
+          chatBody.appendChild(messageDiv);
+        });
+  
+        document.getElementById('chat-name').textContent = contactName;
+        document.getElementById('message-input').disabled = false;
+        document.getElementById('send-button').disabled = false;
+        document.getElementById('send-button').setAttribute('data-contact', contactId);
+      });
+  }
+  
+//   Send Message
+document.getElementById('send-button').addEventListener('click', () => {
+    const contactId = document.getElementById('send-button').getAttribute('data-contact');
+    const messageInput = document.getElementById('message-input');
+    const message = messageInput.value.trim();
+  
+    if (message) {
+      fetch('send_message.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `contact_id=${contactId}&message=${message}`,
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          if (result.status === 'success') {
+            loadChat(contactId, document.getElementById('chat-name').textContent);
+            messageInput.value = ''; // Clear input
+          } else {
+            alert('Failed to send message');
+          }
+        });
+    }
+  });
+  
+
+//   toggle it in ajax request
+function toggleLoading(show) {
+    document.getElementById("loading-spinner").style.display = show ? "block" : "none";
+  }
+  
+  // Example usage:
+  toggleLoading(true);
+  fetch("get_contacts.php")
+    .then((response) => response.json())
+    .then((data) => {
+      toggleLoading(false);
+      // Render contacts
+    });
+  
+
+    // error handling
+
+    function showError(message) {
+        alert(`Error: ${message}`);
+      }
+      
+      // Example usage:
+      fetch("get_contacts.php")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "error") {
+            showError(data.message);
+          } else {
+            // Process data
+          }
+        });
+      

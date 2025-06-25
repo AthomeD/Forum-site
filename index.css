@@ -1,0 +1,309 @@
+/* General Body Styles */
+body {
+  font-family: "Poppins", Arial, sans-serif;
+  background-color: #c4bdba;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  transition: padding 0.3s ease;
+}
+
+/* Forum Body Section */
+.forum-body {
+  width: 100%;
+  max-width: 1200px;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 2vh auto; /* Adds gap below the navbar */
+}
+
+/* Title for Forum Categories */
+.forum-title {
+  font-size: 1.8em;
+  color: #333;
+  text-align: center;
+  margin: 20px;
+}
+
+/* Forum Grid Layout */
+.forum-grid {
+  display: grid;
+  position: relative;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* Individual Forum Category Card */
+.forum-category {
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.forum-icon {
+  font-size: 2em;
+  margin-right: 15px;
+  color: #007bff;
+}
+
+.forum-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.forum-category-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+.forum-description {
+  color: #666;
+  font-size: 0.9em;
+  margin: 5px 0;
+}
+
+.forum-post-count {
+  font-size: 0.85em;
+  color: #007bff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .forum-body {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .forum-category {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .forum-icon {
+    margin-bottom: 10px;
+  }
+}
+
+/* main content area start here */
+.main-content {
+  display: flex;
+  justify-content: center; /* Centers the container horizontally */
+  align-items: center; /* Aligns items vertically (optional if needed) */
+  gap: 10px; /* Adds spacing between the container and side panels */
+  padding: 10px;
+  width: 100%;
+  max-width: 1900px;
+  box-sizing: border-box;
+  /* Ensures padding doesn't affect width */
+}
+
+.side-panel {
+  flex: 1; /* Allows side panels to adjust width responsively */
+  max-width: 300px; /* Optional: Sets a maximum width for the side panels */
+  background: linear-gradient(
+    45deg,
+    #00c6ff,
+    #0072ff,
+    #4e73df
+  ); /* Example background for side panels */
+  color: #fff;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 10px;
+  left: 20px;
+  top: 20px;
+  height: 80%;
+  margin: 10px;
+  z-index: 1;
+  transition: transform 0.3s ease;
+
+  font-size: 1.1rem;
+  color: #fff;
+  /* text-align: center; */
+}
+
+.side-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.side-panel ul li {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background 0.3s ease;
+}
+
+.side-panel ul li:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.left-panel .category {
+  background-color: #ff5722;
+}
+
+.container {
+  flex: 2; /* Main container takes up more space */
+  max-width: 100%;
+  background: #fff;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  transition: max-height 0.4s ease;
+}
+.header {
+  background: linear-gradient(90deg, #8e2de2, #4a00e0);
+  color: #fff;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.header button {
+  background: none;
+  border: 2px solid #fff;
+  color: #fff;
+  border-radius: 15px;
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.header button:hover {
+  background: #fff;
+  color: #4a00e0;
+}
+
+.post-section {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+  background: #f9f9f9;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+}
+
+.post-section.open {
+  max-height: 600px;
+  padding: 20px;
+}
+
+.post {
+  background: #fff;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+.category {
+  display: inline-block;
+  padding: 5px 10px;
+  background: #8e2de2;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 1024px) {
+  body {
+    padding-left: 250px; /* Adjust for smaller screens */
+    padding-right: 250px; /* Adjust for smaller screens */
+  }
+
+  .left-panel,
+  .side-panel {
+    width: 250px; /* Make panels narrower */
+  }
+
+  .main-content {
+    padding: 5px; /* Reduce padding in main content */
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-left: 0; /* Remove padding on smaller devices */
+    padding-right: 0; /* Remove padding on smaller devices */
+  }
+
+  .left-panel,
+  .side-panel {
+    width: 100%; /* Make panels full width */
+    height: auto; /* Adjust height for smaller devices */
+    position: relative; /* Allow panels to scroll with content */
+    top: auto; /* Reset top position */
+    left: 0;
+    right: 0;
+  }
+
+  .main-content {
+    max-width: 100%; /* Allow content to take full width */
+    padding: 10px; /* Keep padding consistent */
+  }
+
+  .container {
+    margin: 10px 0; /* Adjust margin */
+  }
+
+  .header {
+    flex-direction: column; /* Stack the header content */
+    align-items: flex-start;
+  }
+
+  .post {
+    margin: 10px 0; /* Adjust post margins */
+  }
+}
+
+@media (max-width: 480px) {
+  .header h2 {
+    font-size: 1.2rem; /* Reduce font size */
+  }
+
+  .header button {
+    font-size: 0.8rem; /* Reduce button font size */
+  }
+
+  .container {
+    margin: 5px 0; /* Adjust container margin */
+  }
+
+  .post {
+    padding: 10px; /* Reduce post padding */
+  }
+
+  .category {
+    font-size: 0.7rem; /* Reduce category font size */
+  }
+}
+
+/* main content area css ends here */
